@@ -36,7 +36,7 @@ void calcularInflacion(std::vector<Mes>& totales) {
 int main() {
   std::ifstream inputfile("supermercado.csv", std::ifstream::binary);
 
-  // Lee la primera linea
+  // Ignora, salta la primera linea
   std::string line;
   std::getline(inputfile, line);
 
