@@ -5,7 +5,7 @@ Taller 2 para Computación Paralela y Distribuida, primer semestre 2023.
 - Ian Vinzenzo Battistoni Fuentes
 - Vicente Velasquez
 # Ejecución
-El archivo sec.cpp ejecuta el codigo de forma secuencial y archivo par.cpp ejecuta el codigo de forma paralela.
+El archivo sec.cpp ejecuta el código de forma secuencial y archivo par.cpp ejecuta el código de forma paralela.
 # Secuencial
 ```bash
 g++ main.cpp -o main -O2 && time ./sec
