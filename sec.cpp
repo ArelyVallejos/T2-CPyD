@@ -6,36 +6,44 @@
 #include <chrono>
 
 struct Linea {
-  int precio;
+  long long int precio;
   std::string fecha;
   std::string estado;
 };
 
 struct Mes {
-  unsigned long total;
-  int cantidad;
+  unsigned long long total;
+  long long int cantidad;
+  double ipc;
 };
 
-void calcularInflacion(std::vector<Mes>& totales) {
-  int i = 1;
-  double inflacionAcumulada = 0.0;
-  double ipcBase = (double)totales[0].total / (double)totales[0].cantidad;
 
-  for (int month = 1; month < totales.size(); month++) {
-    double ipcActual = (double)totales[month].total / (double)totales[month].cantidad;
-    double variacionPorcentual = ((ipcActual - ipcBase) / ipcBase) * 100.0;
-    inflacionAcumulada += variacionPorcentual;
+std::vector<double> calcularTasaInflacion(const std::vector<Mes>& totales) {
+  std::vector<double> tasaInflacion;
 
-    std::cout << "> MES: " << i++ << "\tIPC: " << ipcActual
-              << "\tVARIACIÓN PORCENTUAL: " << variacionPorcentual << "%" << std::endl;
+  for (int i = 1; i < totales.size(); i++) {
+    double tasa = ((totales[i].ipc - totales[i-1].ipc) / totales[i-1].ipc) * 100.0;
+    tasaInflacion.push_back(tasa);
   }
-  std::cout << "Inflación acumulada: " << inflacionAcumulada << "%" << std::endl;
+
+  return tasaInflacion;
+}
+
+
+  double calcularInflacionAcumulada(const std::vector<double>& tasaInflacion) {
+  double inflacionAcumulada = 0.0;
+
+  for (double tasa : tasaInflacion) {
+    inflacionAcumulada += tasa;
+  }
+
+  return inflacionAcumulada;
 }
 
 int main() {
   std::ifstream inputfile("supermercado.csv", std::ifstream::binary);
 
-  // Ignora, salta la primera linea
+  // Ignora la primera linea
   std::string line;
   std::getline(inputfile, line);
 
@@ -87,6 +95,16 @@ int main() {
         // std::cout << e << std::endl;
         continue;
       }
+
+
+      double ipcBase = totales[0].total; // IPC base (enero)
+      totales[0].ipc = 100.0; // IPC base es 100 para enero
+
+      for (int i = 1; i < totales.size(); i++) {
+        totales[i].ipc = (totales[i].total / ipcBase) * 100.0;
+      }
+
+
       // Descuento
       std::getline(stream, word, ';');
 
@@ -109,8 +127,8 @@ int main() {
     }
   }
 
-  int i = 1;
-  int cant = 0;
+  long long int i = 1;
+  long long int cant = 0;
   for (auto month : totales) {
     cant += month.cantidad;
     std::cout << "> MES: " << i++ << "\tTOTAL: " << month.total
@@ -121,8 +139,16 @@ int main() {
 
   std::cout << "Lineas totales: " << cant << std::endl;
 
-  calcularInflacion(totales);
+  std::vector<double> tasaInflacion = calcularTasaInflacion(totales);
 
+// Mostrar los resultados de la taza de inflación
+   for (int i = 1; i < totales.size(); i++) {
+     std::cout << "> MES: " << i+1 << "\tIPC: " << totales[i].ipc
+            << "\tTASA INFLACION: " << tasaInflacion[i-1] << "%" << std::endl;
+   }
 
+   double inflacionAcumulada = calcularInflacionAcumulada(tasaInflacion);
+
+   std::cout << "Inflación acumulada: " << inflacionAcumulada << "%" << std::endl;
   return 0;
 }
